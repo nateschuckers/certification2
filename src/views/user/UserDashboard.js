@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { useCollection } from '../../hooks/useCollection';
-import { formatTime } from '../../utils/helpers';
+import { collection, onSnapshot } from 'firebase/firestore';
+import useCollection from '../../hooks/useCollection';
 import CourseCard from '../../components/CourseCard';
 import CompletedTrackCard from '../../components/CompletedTrackCard';
+import { formatTime } from '../../utils/helpers';
 
 const UserDashboard = ({ user, onStartCourse }) => {
     const { data: courses, loading: coursesLoading } = useCollection('courses');
@@ -13,10 +13,8 @@ const UserDashboard = ({ user, onStartCourse }) => {
     const { data: users, loading: usersLoading } = useCollection('users');
     const [userCourseData, setUserCourseData] = useState({});
     const [userCourseDataLoading, setUserCourseDataLoading] = useState(true);
-    const { data: activityLogs, loading: activityLogsLoading } = useCollection('activityLogs');
 
     useEffect(() => {
-        if (!user.id) return;
         const unsub = onSnapshot(collection(db, `users/${user.id}/userCourseData`), (snapshot) => {
             const data = {};
             snapshot.forEach(doc => data[doc.id] = doc.data());
@@ -26,31 +24,27 @@ const UserDashboard = ({ user, onStartCourse }) => {
         return () => unsub();
     }, [user.id]);
 
+    const { data: activityLogs, loading: activityLogsLoading } = useCollection('activityLogs');
+
     const userTracksDetails = useMemo(() => {
-        if (!user.trackIds || user.trackIds.length === 0 || !tracks.length || !courses.length) return [];
+        if (!user.trackIds || user.trackIds.length === 0 || !tracks.length) return [];
         return user.trackIds.map(tid => {
             const track = tracks.find(t => t.id === tid);
             if (!track) return null;
             const completedCourses = track.requiredCourses.filter(cid => userCourseData[cid]?.status === 'completed').length;
             const totalCourses = track.requiredCourses.length;
             const completionPercent = totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 100;
-            return { 
-                ...track, 
-                courses: track.requiredCourses.map(cid => courses.find(c => c.id === cid)).filter(Boolean), 
-                completionPercent, 
-                completedCourses, 
-                totalCourses, 
-            };
+            return { ...track, courses: track.requiredCourses.map(cid => courses.find(c => c.id === cid)).filter(Boolean), completionPercent, completedCourses, totalCourses, };
         }).filter(Boolean);
     }, [user.trackIds, userCourseData, tracks, courses]);
 
     const allRequiredCourseIds = useMemo(() => new Set((user.trackIds || []).flatMap(tid => tracks.find(t => t.id === tid)?.requiredCourses || [])), [user.trackIds, tracks]);
     const optionalCourses = useMemo(() => courses.filter(course => !allRequiredCourseIds.has(course.id)), [allRequiredCourseIds, courses]);
-    const completedCourses = useMemo(() => Object.entries(userCourseData).filter(([_, data]) => data.status === 'completed').map(([courseId, _]) => courses.find(c => c.id === courseId)).filter(Boolean), [userCourseData, courses]);
+    const completedCourses = useMemo(() => Object.entries(userCourseData).filter(([, data]) => data.status === 'completed').map(([courseId, _]) => courses.find(c => c.id === courseId)).filter(Boolean), [userCourseData, courses]);
     
     const completedTracks = useMemo(() => userTracksDetails.filter(t => t.completionPercent === 100), [userTracksDetails]);
 
-    const leaderboardData = useMemo(() => {
+     const leaderboardData = useMemo(() => {
         if (!users.length || !activityLogs.length) return [];
         return users
             .map(u => ({
@@ -75,11 +69,11 @@ const UserDashboard = ({ user, onStartCourse }) => {
     }
 
     return ( 
-        <div className="p-4 md:p-8"> 
+        <div className="p-8"> 
             <h2 className="text-3xl font-bold mb-2 text-neutral-900 dark:text-white">Welcome, {user.name}!</h2> 
             <p className="text-neutral-500 dark:text-neutral-400 mb-8">Here is your certification progress.</p> 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-2 space-y-10">
                     {userTracksDetails.length > 0 ? (
                         <div>
                             <h3 className="text-xl font-semibold mb-4 text-neutral-900 dark:text-white">Your Certification Paths</h3>
@@ -96,7 +90,7 @@ const UserDashboard = ({ user, onStartCourse }) => {
                                         <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2.5 mb-4">
                                             <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${track.completionPercent}%` }}></div>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                             {track.courses.map(course => <CourseCard key={course.id} course={course} courseData={userCourseData[course.id]} onStartCourse={onStartCourse} trackIcon={track.icon} />)}
                                         </div>
                                     </div>
@@ -104,29 +98,29 @@ const UserDashboard = ({ user, onStartCourse }) => {
                             </div>
                         </div>
                     ) : (
-                        <div> <h3 className="text-xl font-semibold mb-4 text-neutral-900 dark:text-white">Assigned Courses</h3> <p className="text-neutral-500 dark:text-neutral-400">You are not currently assigned to any certification paths.</p></div>
+                        <div> <h3 className="text-xl font-semibold mb-4 text-neutral-900 dark:text-white">Required Courses</h3> <p className="text-neutral-500 dark:text-neutral-400">You are not currently assigned to any certification paths.</p></div>
                     )}
                     
                     {optionalCourses.length > 0 && (
                         <div> 
                             <h3 className="text-xl font-semibold mb-4 text-neutral-900 dark:text-white">Optional Courses</h3> 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 {optionalCourses.map(course => <CourseCard key={course.id} course={course} courseData={userCourseData[course.id]} onStartCourse={onStartCourse} />)}
                             </div> 
                         </div>
                     )}
                 </div> 
-                <div className="lg:col-span-1 space-y-6">
+                <div className="md:col-span-1 space-y-6">
                     <h3 className="text-xl font-semibold text-neutral-900 dark:text-white">Your Stats</h3>
                     <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md dark:shadow-neutral-900 p-4">
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400">Total Training Time</p>
+                        <p className="text-neutral-500 dark:text-neutral-400">Total Training Time</p>
                         <p className="text-2xl font-semibold text-neutral-900 dark:text-white">{formatTime(userActivityLog?.totalTrainingTime || 0)}</p>
                     </div>
                     <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md dark:shadow-neutral-900 p-4">
                         <h4 className="font-bold text-lg mb-4 text-neutral-900 dark:text-white">Your Achievements</h4>
                         {completedTracks.length > 0 && (
                             <>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     {completedTracks.map(track => <CompletedTrackCard key={track.id} track={track} />)}
                                 </div>
                                 <hr className="my-4 border-neutral-200 dark:border-neutral-700"/>
@@ -174,3 +168,4 @@ UserDashboard.propTypes = {
 };
 
 export default UserDashboard;
+
