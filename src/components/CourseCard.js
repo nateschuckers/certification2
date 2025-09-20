@@ -43,19 +43,4 @@ CourseCard.propTypes = {
 };
 
 export default CourseCard;
-```
-
-### Next Steps
-
-1.  **Update the File:** Save these changes to your local `src/components/CourseCard.js` file.
-2.  **Push the Change:** In your terminal, push this new fix to your `refactor` branch on GitHub.
-    ```bash
-    git add src/components/CourseCard.js
-    ```
-    ```bash
-    git commit -m "Fix: Correct import path in CourseCard"
-    ```
-    ```bash
-    git push origin refactor
-    
 
