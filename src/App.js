@@ -1,48 +1,49 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from './context/AuthContext';
-import { useCollection } from './hooks/useCollection';
-import { useTheme } from './hooks/useTheme';
-import { signOut } from 'firebase/auth';
-import { auth } from './firebase/config';
-
+import useTheme from './hooks/useTheme';
+import useCollection from './hooks/useCollection';
 import Header from './components/Header';
 import OnboardingModal from './components/OnboardingModal';
-import LoginScreen from './views/auth/LoginScreen';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Lazy load the main dashboard components for better performance
-const UserDashboard = lazy(() => import('./views/user/UserDashboard'));
-const AdminDashboard = lazy(() => import('./views/admin/AdminDashboard'));
-const QuestionView = lazy(() => import('./views/user/QuestionView'));
+// Lazy load views
+const LoginScreen = React.lazy(() => import('./views/auth/LoginScreen'));
+const UserDashboard = React.lazy(() => import('./views/user/UserDashboard'));
+const AdminDashboard = React.lazy(() => import('./views/admin/AdminDashboard'));
+const QuestionView = React.lazy(() => import('./views/user/QuestionView'));
 
 function App() {
-    const { userData, loading } = useAuth();
+    const { userData, loading: authLoading } = useAuth();
     const [currentView, setCurrentView] = useState('dashboard');
     const [takingCourseId, setTakingCourseId] = useState(null);
     const [theme, setTheme] = useTheme();
     const [showOnboarding, setShowOnboarding] = useState(false);
-    
-    // We still need to fetch courses at the top level to pass to the QuestionView
-    const { data: courses, loading: coursesLoading } = useCollection('courses');
+    const { data: courses, loading: coursesLoading } = useCollection('courses', {
+        skip: !userData
+    });
 
     useEffect(() => {
-        if (!loading && userData) {
+        if (!authLoading && userData) {
              if (!sessionStorage.getItem('hasSeenTour')) {
                 setShowOnboarding(true);
                 sessionStorage.setItem('hasSeenTour', 'true');
             }
         }
-    }, [userData, loading]);
+    }, [userData, authLoading]);
     
     const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
-    
     const handleStartCourse = (courseId) => setTakingCourseId(courseId);
     const handleExitCourse = () => setTakingCourseId(null);
     
     const handleLogout = async () => {
         handleExitCourse();
-        setCurrentView('dashboard');
-        await signOut(auth);
+        const { signOut, auth } = await import('./firebase/config');
+        try {
+            await signOut(auth);
+            setCurrentView('dashboard');
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     };
 
     useEffect(() => { 
@@ -52,19 +53,17 @@ function App() {
         } 
     }, [userData]);
 
-    if (loading || coursesLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-100">
-                Loading Application...
-            </div>
-        );
+    if (authLoading || coursesLoading) {
+        return <div className="min-h-screen flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-white">Loading Application...</div>
     }
 
     if (!userData) {
         return (
-             <div className={theme}>
+            <div className={theme}>
                 <div className="bg-neutral-100 dark:bg-neutral-900">
-                    <LoginScreen />
+                    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+                        <LoginScreen />
+                    </Suspense>
                 </div>
             </div>
         );
@@ -72,7 +71,7 @@ function App() {
     
     const courseBeingTaken = takingCourseId ? courses.find(c => c.id === takingCourseId) : null;
 
-    const renderCurrentView = () => {
+    const renderMainContent = () => {
         if (courseBeingTaken) {
             return <QuestionView course={courseBeingTaken} user={userData} onBack={handleExitCourse} />;
         }
@@ -97,8 +96,8 @@ function App() {
                 />
                 <main>
                     <ErrorBoundary>
-                        <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
-                            {renderCurrentView()}
+                        <Suspense fallback={<div className="p-8 text-center">Loading Page...</div>}>
+                           {renderMainContent()}
                         </Suspense>
                     </ErrorBoundary>
                 </main>
@@ -108,4 +107,19 @@ function App() {
 };
 
 export default App;
+```
+
+### Next Steps
+
+1.  **Update the File:** Save the changes to your local `src/App.js` file.
+2.  **Push the Change:** In your terminal, push this fix to your `refactor` branch on GitHub.
+    ```bash
+    git add src/App.js
+    ```
+    ```bash
+    git commit -m "Fix: Correct useCollection import in App.js"
+    ```
+    ```bash
+    git push origin refactor
+    
 
