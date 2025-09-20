@@ -43,18 +43,4 @@ AnswerFeedbackModal.propTypes = {
 };
 
 export default AnswerFeedbackModal;
-```
-
-### Next Steps
-
-After you've updated the file with the clean code, please push the change to your `refactor` branch on GitHub.
-
-```bash
-git add src/components/AnswerFeedbackModal.js
-```
-```bash
-git commit -m "Fix: Remove invalid text from AnswerFeedbackModal"
-```
-```bash
-git push origin refactor
 
