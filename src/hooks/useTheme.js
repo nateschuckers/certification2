@@ -11,19 +11,4 @@ const useTheme = () => {
 };
 
 export default useTheme;
-```
-
-### Next Steps
-
-1.  **Update the File:** Save these changes to your local `src/hooks/useTheme.js` file.
-2.  **Push the Change:** In your terminal, please push this final fix to your `refactor` branch on GitHub.
-    ```bash
-    git add src/hooks/useTheme.js
-    ```
-    ```bash
-    git commit -m "Fix: Correct export for useTheme hook"
-    ```
-    ```bash
-    git push origin refactor
-    
 
