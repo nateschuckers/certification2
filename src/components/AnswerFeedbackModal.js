@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { CORRECT_GIFS, CORRECT_MESSAGES, INCORRECT_GIFS, INCORRECT_MESSAGES } from '../../utils/constants';
+import { CORRECT_GIFS, CORRECT_MESSAGES, INCORRECT_GIFS, INCORRECT_MESSAGES } from '../utils/constants';
 
 const AnswerFeedbackModal = ({ isCorrect, onNext }) => {
     const gifUrl = useMemo(() => {
@@ -39,7 +39,23 @@ const AnswerFeedbackModal = ({ isCorrect, onNext }) => {
 
 AnswerFeedbackModal.propTypes = {
     isCorrect: PropTypes.bool.isRequired,
-    onNext: PropTypes.func.isRequired,
+    onNext: PropTypes.func.isRequired
 };
 
 export default AnswerFeedbackModal;
+```
+
+### Next Steps
+
+1.  **Update the File:** Save the changes to your local `src/components/AnswerFeedbackModal.js` file.
+2.  **Push the Change:** In your terminal, push this fix to your `refactor` branch on GitHub.
+    ```bash
+    git add src/components/AnswerFeedbackModal.js
+    ```
+    ```bash
+    git commit -m "Fix: Correct import path in AnswerFeedbackModal"
+    ```
+    ```bash
+    git push origin refactor
+    
+
