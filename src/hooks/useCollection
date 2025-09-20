@@ -1,0 +1,38 @@
+import { useState, useEffect } from 'react';
+import { collection, query, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase/config';
+
+export const useCollection = (collectionName, options = {}) => {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (options.skip) {
+          setLoading(false);
+          return;
+        }
+        
+        let collectionRef = collection(db, collectionName);
+        
+        const q = query(collectionRef);
+
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const items = [];
+            querySnapshot.forEach((doc) => {
+                items.push({ id: doc.id, ...doc.data() });
+            });
+            setData(items);
+            setLoading(false);
+        }, (err) => {
+            console.error(`Error fetching collection: ${collectionName}`, err);
+            setError(err);
+            setLoading(false);
+        });
+
+        // Unsubscribe on unmount
+        return () => unsubscribe();
+    }, [collectionName, options.skip]); // Re-run effect if collectionName or skip option changes
+    
+    return { data, loading, error };
+};
