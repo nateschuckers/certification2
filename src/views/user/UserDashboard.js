@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { db } from '../../firebase/config';
 import { collection, onSnapshot } from 'firebase/firestore';
-import useCollection from '../../hooks/useCollection';
+import { useCollection } from '../../hooks/useCollection';
 import CourseCard from '../../components/CourseCard';
 import CompletedTrackCard from '../../components/CompletedTrackCard';
 import { formatTime } from '../../utils/helpers';
@@ -15,6 +15,7 @@ const UserDashboard = ({ user, onStartCourse }) => {
     const [userCourseDataLoading, setUserCourseDataLoading] = useState(true);
 
     useEffect(() => {
+        if (!user) return;
         const unsub = onSnapshot(collection(db, `users/${user.id}/userCourseData`), (snapshot) => {
             const data = {};
             snapshot.forEach(doc => data[doc.id] = doc.data());
@@ -40,7 +41,7 @@ const UserDashboard = ({ user, onStartCourse }) => {
 
     const allRequiredCourseIds = useMemo(() => new Set((user.trackIds || []).flatMap(tid => tracks.find(t => t.id === tid)?.requiredCourses || [])), [user.trackIds, tracks]);
     const optionalCourses = useMemo(() => courses.filter(course => !allRequiredCourseIds.has(course.id)), [allRequiredCourseIds, courses]);
-    const completedCourses = useMemo(() => Object.entries(userCourseData).filter(([, data]) => data.status === 'completed').map(([courseId, _]) => courses.find(c => c.id === courseId)).filter(Boolean), [userCourseData, courses]);
+    const completedCourses = useMemo(() => Object.entries(userCourseData).filter(([_, data]) => data.status === 'completed').map(([courseId, _]) => courses.find(c => c.id === courseId)).filter(Boolean), [userCourseData, courses]);
     
     const completedTracks = useMemo(() => userTracksDetails.filter(t => t.completionPercent === 100), [userTracksDetails]);
 
@@ -164,7 +165,7 @@ const UserDashboard = ({ user, onStartCourse }) => {
 
 UserDashboard.propTypes = {
     user: PropTypes.object.isRequired,
-    onStartCourse: PropTypes.func.isRequired,
+    onStartCourse: PropTypes.func.isRequired
 };
 
 export default UserDashboard;

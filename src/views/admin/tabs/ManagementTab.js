@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { db, auth, app as mainApp } from '../../../firebase/config';
+import { initializeApp } from 'firebase/app';
 import {
     getAuth,
     createUserWithEmailAndPassword,
     sendPasswordResetEmail,
-    initializeApp
 } from 'firebase/auth';
 import {
     collection,

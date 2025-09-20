@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from './context/AuthContext';
 import useTheme from './hooks/useTheme';
-import useCollection from './hooks/useCollection';
+import { useCollection } from './hooks/useCollection';
 import Header from './components/Header';
 import OnboardingModal from './components/OnboardingModal';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -37,7 +37,8 @@ function App() {
     
     const handleLogout = async () => {
         handleExitCourse();
-        const { signOut, auth } = await import('./firebase/config');
+        const { auth } = await import('./firebase/config');
+        const { signOut } = await import('firebase/auth');
         try {
             await signOut(auth);
             setCurrentView('dashboard');
