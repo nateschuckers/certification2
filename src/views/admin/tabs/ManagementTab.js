@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { db, auth, app as mainApp } from '../../../firebase/config';
+import { initializeApp } from 'firebase/app';
 import {
     getAuth,
     createUserWithEmailAndPassword,
     sendPasswordResetEmail,
-    initializeApp
 } from 'firebase/auth';
 import {
     collection,
@@ -60,7 +60,7 @@ const ManagementTab = ({ users, courses, tracks }) => {
             }, 5000);
             return () => clearTimeout(timer);
         }
-    }, [statusMessage.key]);
+    }, [statusMessage.key, statusMessage.message]);
 
     // --- Handlers for CRUD operations ---
 
@@ -77,7 +77,11 @@ const ManagementTab = ({ users, courses, tracks }) => {
             const newUser = userCredential.user;
 
             await setDoc(doc(db, "users", newUser.uid), {
-                name: newUserName, email: newUserEmail, isAdmin: newUserIsAdmin, trackIds: []
+                name: newUserName,
+                email: newUserEmail,
+                isAdmin: newUserIsAdmin,
+                trackIds: [],
+                themePreference: 'dark' // Add default theme preference
             });
             await setDoc(doc(db, "activityLogs", newUser.uid), {
                 logins: 0, lastLogin: null, totalTrainingTime: 0,
