@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from './context/AuthContext';
 import useTheme from './hooks/useTheme';
-import useCollection from './hooks/useCollection';
+import { useCollection } from './hooks/useCollection';
 import Header from './components/Header';
 import OnboardingModal from './components/OnboardingModal';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -16,7 +16,7 @@ function App() {
     const { userData, loading: authLoading } = useAuth();
     const [currentView, setCurrentView] = useState('dashboard');
     const [takingCourseId, setTakingCourseId] = useState(null);
-    const [theme, setTheme] = useTheme();
+    const [theme, toggleTheme] = useTheme(userData); // Pass userData to the hook
     const [showOnboarding, setShowOnboarding] = useState(false);
     const { data: courses, loading: coursesLoading } = useCollection('courses', {
         skip: !userData
@@ -31,13 +31,14 @@ function App() {
         }
     }, [userData, authLoading]);
     
-    const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+    // The toggleTheme function now comes directly from the hook
     const handleStartCourse = (courseId) => setTakingCourseId(courseId);
     const handleExitCourse = () => setTakingCourseId(null);
     
     const handleLogout = async () => {
         handleExitCourse();
-        const { signOut, auth } = await import('./firebase/config');
+        const { auth } = await import('./firebase/config');
+        const { signOut } = await import('firebase/auth');
         try {
             await signOut(auth);
             setCurrentView('dashboard');
