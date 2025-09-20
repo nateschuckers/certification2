@@ -38,12 +38,5 @@
         ]
     }
 }
-```
 
-After updating these files, please push all the changes to your `refactor` branch on GitHub.
-
-```bash
-git add .
-git commit -m "Fix: Clean up multiple files with syntax errors"
-git push origin refactor
 
