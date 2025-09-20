@@ -47,15 +47,14 @@ export default AnswerFeedbackModal;
 
 ### Next Steps
 
-1.  **Update the File:** Save the changes to your local `src/components/AnswerFeedbackModal.js` file.
-2.  **Push the Change:** In your terminal, push this fix to your `refactor` branch on GitHub.
-    ```bash
-    git add src/components/AnswerFeedbackModal.js
-    ```
-    ```bash
-    git commit -m "Fix: Correct import path in AnswerFeedbackModal"
-    ```
-    ```bash
-    git push origin refactor
-    
+After you've updated the file with the clean code, please push the change to your `refactor` branch on GitHub.
+
+```bash
+git add src/components/AnswerFeedbackModal.js
+```
+```bash
+git commit -m "Fix: Remove invalid text from AnswerFeedbackModal"
+```
+```bash
+git push origin refactor
 
