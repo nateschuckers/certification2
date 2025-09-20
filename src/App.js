@@ -107,19 +107,4 @@ function App() {
 };
 
 export default App;
-```
-
-### Next Steps
-
-1.  **Update the File:** Save the changes to your local `src/App.js` file.
-2.  **Push the Change:** In your terminal, push this fix to your `refactor` branch on GitHub.
-    ```bash
-    git add src/App.js
-    ```
-    ```bash
-    git commit -m "Fix: Correct useCollection import in App.js"
-    ```
-    ```bash
-    git push origin refactor
-    
 
